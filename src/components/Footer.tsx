@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import ambikaLogo from '../assets/images/IMG_6713.PNG';
+import ambikaLogo from '../assets/images/IMG_6713.png';
 
 const footerLinks = {
   'Main Pages': [
