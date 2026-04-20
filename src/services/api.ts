@@ -17,10 +17,12 @@ import type {
 } from '../types';
 
 // Use cookies for auth (httpOnly) — do NOT store tokens in localStorage.
+const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: baseURL,
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true, // send cookies and accept cookie-based sessions
+  withCredentials: true,
 });
 
 // Emit unauthorized events when server responds 401 so UI can react
