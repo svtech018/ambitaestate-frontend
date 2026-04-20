@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bars3Icon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
-import ambikaLogo from '../assets/images/IMG_6713.png';
-
+import ambikaLogo from '../assets/images/img_6713.png';
 const propertyCategories = [
   { label: 'All Properties', value: '' },
   { label: 'Land/Plots', value: 'LAND_PLOTS' },
