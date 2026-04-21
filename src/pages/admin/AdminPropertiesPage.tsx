@@ -2,6 +2,7 @@ import axios from 'axios';
 import { useEffect, useState, type FormEvent, useCallback } from 'react';
 import { adminPropertyService } from '../../services/api';
 import type { AdminProperty, AreaUnit, ListingType, PropertyStatus, PropertyType } from '../../types';
+import CustomSelect from '../../components/CustomSelect';
 
 type PropertyFormErrors = Partial<Record<'title' | 'price' | 'address' | 'city' | 'state' | 'area' | 'description' | 'imageUrls' | 'zipCode' | 'bedrooms' | 'bathrooms' | 'parkingSpaces' | 'yearBuilt', string>>;
 
@@ -431,15 +432,19 @@ export default function AdminPropertiesPage() {
             </label>
             <label className="block text-sm font-medium text-stone-700">
               <span className="mb-2 block">Property type</span>
-              <select value={form.propertyType} onChange={(e) => setForm({ ...form, propertyType: e.target.value as PropertyType })} className="w-full rounded-2xl border border-stone-300 px-4 py-3">
-                {propertyTypes.map((type) => <option key={type} value={type}>{PROPERTY_TYPE_LABELS[type]}</option>)}
-              </select>
+              <CustomSelect
+                value={form.propertyType}
+                options={propertyTypes.map((type) => ({ label: PROPERTY_TYPE_LABELS[type], value: type }))}
+                onChange={(value) => setForm({ ...form, propertyType: value as PropertyType })}
+              />
             </label>
             <label className="block text-sm font-medium text-stone-700">
               <span className="mb-2 block">Listing type</span>
-              <select value={form.listingType} onChange={(e) => setForm({ ...form, listingType: e.target.value as ListingType })} className="w-full rounded-2xl border border-stone-300 px-4 py-3">
-                {listingTypes.map((type) => <option key={type} value={type}>{type}</option>)}
-              </select>
+              <CustomSelect
+                value={form.listingType}
+                options={listingTypes.map((type) => ({ label: type, value: type }))}
+                onChange={(value) => setForm({ ...form, listingType: value as ListingType })}
+              />
             </label>
             <label className="block text-sm font-medium text-stone-700 md:col-span-2">
               <span className="mb-2 block">Address <span className="text-red-500">*</span></span>
@@ -463,18 +468,23 @@ export default function AdminPropertiesPage() {
             </label>
             <label className="block text-sm font-medium text-stone-700">
               <span className="mb-2 block">Status</span>
-              <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as PropertyStatus })} className="w-full rounded-2xl border border-stone-300 px-4 py-3">
-                {propertyStatuses.map((status) => <option key={status} value={status}>{status}</option>)}
-              </select>
+              <CustomSelect
+                value={form.status}
+                options={propertyStatuses.map((status) => ({ label: status, value: status }))}
+                onChange={(value) => setForm({ ...form, status: value as PropertyStatus })}
+              />
             </label>
             <label className="block text-sm font-medium text-stone-700">
               <span className="mb-2 block">Area <span className="text-red-500">*</span></span>
               <div className="flex gap-2">
                 <input id="property-area" value={getNumberInputValue(form.area)} onChange={(e) => updateField('area', parseNumberInput(e.target.value))} className={`flex-1 rounded-2xl border px-4 py-3 ${fieldErrors.area ? 'border-red-400' : 'border-stone-300'}`} type="number" min="0" step="0.01" />
-                <select value={form.areaUnit} onChange={(e) => updateField('areaUnit', e.target.value as AreaUnit)} className="rounded-2xl border border-stone-300 px-3 py-3">
-                  <option value="SQFT">Sq.ft</option>
-                  <option value="CENTS">Cents</option>
-                </select>
+                <div className="w-32">
+                  <CustomSelect
+                    value={form.areaUnit}
+                    options={[{ label: 'Sq.ft', value: 'SQFT' }, { label: 'Cents', value: 'CENTS' }]}
+                    onChange={(value) => updateField('areaUnit', value as AreaUnit)}
+                  />
+                </div>
               </div>
               {fieldErrors.area && <p className="mt-2 text-sm text-red-600">{fieldErrors.area}</p>}
             </label>

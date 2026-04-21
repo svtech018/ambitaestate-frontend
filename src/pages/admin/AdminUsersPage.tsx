@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, type FormEvent } from 'react';
 import axios from 'axios';
 import { adminUserService } from '../../services/api';
 import type { AdminUser, UserRole } from '../../types';
+import CustomSelect from '../../components/CustomSelect';
 
 type UserFormErrors = Partial<Record<'username' | 'email' | 'firstName' | 'lastName' | 'phoneNumber' | 'password', string>>;
 
@@ -173,9 +174,14 @@ export default function AdminUsersPage() {
             <input id="user-password" value={form.password ?? ''} onChange={(e) => updateField('password', e.target.value)} className={`w-full rounded-2xl border px-4 py-3 ${fieldErrors.password ? 'border-red-400' : 'border-stone-300'}`} placeholder={editingId ? 'New password (optional)' : 'Password'} type="password" required={!editingId} />
             {fieldErrors.password && <p className="mt-2 text-sm text-red-600">{fieldErrors.password}</p>}
           </label>
-          <select value={form.role} onChange={(e) => updateField('role', e.target.value as UserRole)} className="rounded-2xl border border-stone-300 px-4 py-3">
-            {roles.map((role) => <option key={role} value={role}>{role}</option>)}
-          </select>
+          <label className="block text-sm font-medium text-stone-700">
+            <span className="mb-2 block">Role</span>
+            <CustomSelect
+              value={form.role}
+              options={roles.map((role) => ({ label: role, value: role }))}
+              onChange={(value) => updateField('role', value as UserRole)}
+            />
+          </label>
           <label className="flex items-center gap-3 rounded-2xl border border-stone-300 px-4 py-3 text-sm text-stone-700">
             <input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} />
             User is active

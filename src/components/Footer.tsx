@@ -110,9 +110,6 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Ambika Real Estate. All rights
             reserved.
           </p>
-          <p className="text-xs text-stone-600">
-            Built with React + Spring Boot
-          </p>
         </div>
       </div>
     </footer>
