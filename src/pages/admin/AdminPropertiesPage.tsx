@@ -119,6 +119,7 @@ export default function AdminPropertiesPage() {
   const [form, setForm] = useState<AdminProperty>(emptyProperty);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState<'success' | 'error'>('success');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<UploadedImageItem[]>([]);
   const [fieldErrors, setFieldErrors] = useState<PropertyFormErrors>({});
@@ -143,8 +144,9 @@ export default function AdminPropertiesPage() {
     return errors;
   };
 
-  const showMessage = useCallback((msg: string) => {
+  const showMessage = useCallback((msg: string, type: 'success' | 'error' = 'success') => {
     setMessage(msg);
+    setMessageType(type);
     setTimeout(() => setMessage(''), 5000);
   }, []);
 
@@ -274,22 +276,35 @@ export default function AdminPropertiesPage() {
 
   const removeProperty = async (id?: number) => {
     if (!id) return;
-    await adminPropertyService.remove(id);
-    if (editingId === id) {
-      setEditingId(null);
-      setForm(emptyProperty);
-      setIsFormOpen(false);
-      setUploadedImages([]);
+    try {
+      await adminPropertyService.remove(id);
+      if (editingId === id) {
+        setEditingId(null);
+        setForm(emptyProperty);
+        setIsFormOpen(false);
+        setUploadedImages([]);
+      }
+      showMessage('Property deleted successfully.');
+      await loadProperties();
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const msg = (error.response?.data as { message?: string } | undefined)?.message;
+        showMessage(msg ?? 'Unable to delete property. Please try again.', 'error');
+      } else {
+        showMessage('Unable to delete property. Please try again.', 'error');
+      }
     }
-    showMessage('Property deleted successfully.');
-    await loadProperties();
   };
 
-  const updateListField = (field: 'imageUrls' | 'amenities', value: string) => {
-    setForm((current) => ({
-      ...current,
-      [field]: value.split('\n').map((item) => item.trim()).filter(Boolean),
-    }));
+  const removeUploadedImage = (indexToRemove: number) => {
+    setUploadedImages((current) => {
+      const next = current.filter((_, index) => index !== indexToRemove);
+      setForm((existing) => ({
+        ...existing,
+        imageUrls: next.map((item) => item.previewUrl),
+      }));
+      return next;
+    });
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -310,17 +325,6 @@ export default function AdminPropertiesPage() {
     event.target.value = '';
   };
 
-  const removeUploadedImage = (indexToRemove: number) => {
-    setUploadedImages((current) => {
-      const next = current.filter((_, index) => index !== indexToRemove);
-      setForm((existing) => ({
-        ...existing,
-        imageUrls: next.map((item) => item.previewUrl),
-      }));
-      return next;
-    });
-  };
-
   return (
     <div className="space-y-8">
       <section className="rounded-2xl bg-white p-6 shadow-sm shadow-stone-200/60 sm:p-8">
@@ -330,7 +334,15 @@ export default function AdminPropertiesPage() {
             <h1 className="mt-2 font-serif text-3xl font-bold text-stone-900">Manage Properties</h1>
           </div>
           <div className="flex flex-wrap items-center gap-3">
-            {message && <p className="rounded-full bg-emerald-50 px-4 py-2 text-sm text-emerald-700">{message}</p>}
+            {message && (
+              <p className={`rounded-full px-4 py-2 text-sm font-medium ${
+                messageType === 'success'
+                  ? 'bg-emerald-50 text-emerald-700'
+                  : 'bg-red-50 text-red-700'
+              }`}>
+                {message}
+              </p>
+            )}
             <button
               type="button"
               onClick={() => {
@@ -474,11 +486,13 @@ export default function AdminPropertiesPage() {
                 onChange={(value) => setForm({ ...form, status: value as PropertyStatus })}
               />
             </label>
-            <label className="block text-sm font-medium text-stone-700">
+            <label className="block text-sm font-medium text-stone-700 md:col-span-2">
               <span className="mb-2 block">Area <span className="text-red-500">*</span></span>
-              <div className="flex gap-2">
-                <input id="property-area" value={getNumberInputValue(form.area)} onChange={(e) => updateField('area', parseNumberInput(e.target.value))} className={`flex-1 rounded-2xl border px-4 py-3 ${fieldErrors.area ? 'border-red-400' : 'border-stone-300'}`} type="number" min="0" step="0.01" />
-                <div className="w-32">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <div className="md:col-span-2">
+                  <input id="property-area" value={getNumberInputValue(form.area)} onChange={(e) => updateField('area', parseNumberInput(e.target.value))} className={`w-full rounded-2xl border px-4 py-3 ${fieldErrors.area ? 'border-red-400' : 'border-stone-300'}`} type="number" min="0" step="0.01" />
+                </div>
+                <div>
                   <CustomSelect
                     value={form.areaUnit}
                     options={[{ label: 'Sq.ft', value: 'SQFT' }, { label: 'Cents', value: 'CENTS' }]}
@@ -550,9 +564,52 @@ export default function AdminPropertiesPage() {
                 </div>
               )}
             </div>
-            <label className="block text-sm font-medium text-stone-700">
+            <label className="block text-sm font-medium text-stone-700 md:col-span-2">
               <span className="mb-2 block">Amenities</span>
-              <textarea value={form.amenities.join('\n')} onChange={(e) => updateListField('amenities', e.target.value)} className="min-h-32 w-full rounded-2xl border border-stone-300 px-4 py-3" />
+              <div className="rounded-2xl border border-stone-300 px-4 py-3 space-y-3">
+                <input 
+                  placeholder="Enter amenity and press Enter (e.g., Pool, Parking Club, etc.)"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+                      e.preventDefault();
+                      const newAmenity = e.currentTarget.value.trim();
+                      if (!form.amenities.includes(newAmenity)) {
+                        setForm((f) => ({
+                          ...f,
+                          amenities: [...f.amenities, newAmenity],
+                        }));
+                      }
+                      e.currentTarget.value = '';
+                    }
+                  }}
+                  className="w-full border-0 bg-transparent px-0 py-0 text-sm focus:outline-none focus:ring-0"
+                />
+                {form.amenities.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-2 border-t border-stone-200">
+                    {form.amenities.map((amenity, idx) => (
+                      <div
+                        key={idx}
+                        className="inline-flex items-center gap-2 rounded-full bg-primary-100 px-3 py-1.5 text-sm text-primary-700"
+                      >
+                        <span>{amenity}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setForm((f) => ({
+                              ...f,
+                              amenities: f.amenities.filter((_, i) => i !== idx),
+                            }));
+                          }}
+                          className="ml-1 hover:text-primary-900 font-semibold"
+                          title="Remove"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </label>
             <label className="flex items-center gap-3 rounded-2xl border border-stone-300 px-4 py-4 text-sm font-medium text-stone-700 md:col-span-2">
               <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} />
