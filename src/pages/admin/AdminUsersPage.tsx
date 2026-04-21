@@ -101,8 +101,27 @@ export default function AdminUsersPage() {
       await loadUsers();
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        const msg = (error.response?.data as { message?: string } | undefined)?.message;
-        showMessage(msg ?? 'Unable to save user. Please try again.', 'error');
+        const errorData = error.response?.data as any;
+        
+        // Handle backend validation errors
+        if (errorData?.data && typeof errorData.data === 'object' && !Array.isArray(errorData.data)) {
+          // Map backend field errors to frontend errors
+          const backendErrors: UserFormErrors = {};
+          for (const [field, message] of Object.entries(errorData.data)) {
+            if (typeof message === 'string') {
+              backendErrors[field as keyof UserFormErrors] = message;
+            }
+          }
+          if (Object.keys(backendErrors).length > 0) {
+            setFieldErrors(backendErrors);
+            const firstErrorField = Object.keys(backendErrors)[0];
+            focusField(`user-${firstErrorField}`);
+            return;
+          }
+        }
+        
+        const msg = errorData?.message ?? 'Unable to save user. Please try again.';
+        showMessage(msg, 'error');
       } else {
         showMessage('Unable to save user. Please try again.', 'error');
       }
@@ -161,9 +180,26 @@ export default function AdminUsersPage() {
             {fieldErrors.lastName && <p className="mt-2 text-sm text-red-600">{fieldErrors.lastName}</p>}
           </label>
           <label className="block text-sm font-medium text-stone-700">
-            <span className="mb-2 block">Phone number</span>
-            <input id="user-phoneNumber" value={form.phoneNumber} onChange={(e) => updateField('phoneNumber', e.target.value)} className={`w-full rounded-2xl border px-4 py-3 ${fieldErrors.phoneNumber ? 'border-red-400' : 'border-stone-300'}`} placeholder="Phone number" />
-            {fieldErrors.phoneNumber && <p className="mt-2 text-sm text-red-600">{fieldErrors.phoneNumber}</p>}
+            <span className="mb-2 block">Phone number <span className="text-xs text-stone-500">(optional)</span></span>
+            <input 
+              id="user-phoneNumber" 
+              value={form.phoneNumber} 
+              onChange={(e) => updateField('phoneNumber', e.target.value)} 
+              className={`w-full rounded-2xl border px-4 py-3 transition-colors ${
+                fieldErrors.phoneNumber 
+                  ? 'border-red-400 bg-red-50 focus:border-red-500 focus:ring-1 focus:ring-red-500' 
+                  : 'border-stone-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500'
+              }`} 
+              placeholder="e.g. +91 9876543210 or +1 (555) 123-4567" 
+              type="tel"
+            />
+            {fieldErrors.phoneNumber ? (
+              <p className="mt-2 text-sm text-red-600 font-medium flex items-center gap-1">
+                <span>⚠️</span>{fieldErrors.phoneNumber}
+              </p>
+            ) : (
+              <p className="mt-1 text-xs text-stone-500">Format: +country code followed by digits (e.g., +91 9876543210)</p>
+            )}
           </label>
           <label className="block text-sm font-medium text-stone-700">
             <span className="mb-2 block">Location</span>
