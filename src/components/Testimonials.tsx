@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 const testimonials = [
   {
@@ -41,21 +40,8 @@ const testimonials = [
 ];
 
 export default function Testimonials() {
-  const [active, setActive] = useState(0);
-
-  // Auto-rotate carousel every 5 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActive((p) => (p + 1) % testimonials.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const next = () => setActive((p) => (p + 1) % testimonials.length);
-  const prev = () =>
-    setActive((p) => (p - 1 + testimonials.length) % testimonials.length);
-
-  const current = testimonials[active]!;
+  // Continuous horizontal scrolling carousel
+  const duplicatedTestimonials = [...testimonials, ...testimonials];
 
   return (
     <section className="bg-white py-24">
@@ -79,87 +65,53 @@ export default function Testimonials() {
           </p>
         </motion.div>
 
-        <div className="relative mt-16">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={active}
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 }}
-              transition={{ duration: 0.4 }}
-              className="mx-auto max-w-3xl rounded-2xl bg-stone-50 p-8 shadow-lg shadow-stone-200/50 sm:p-12"
-            >
-              {/* Stars */}
-              <div className="flex gap-1">
-                {[...Array(current.rating)].map((_, i) => (
-                  <svg
-                    key={i}
-                    className="h-5 w-5 text-primary-500"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
+        <div className="relative mt-16 overflow-hidden">
+          <motion.div
+            animate={{ x: [0, -3200] }}
+            transition={{
+              duration: 40,
+              repeat: Infinity,
+              ease: 'linear',
+            }}
+            className="flex gap-8"
+          >
+            {duplicatedTestimonials.map((testimonial, idx) => (
+              <div
+                key={idx}
+                className="flex-shrink-0 w-full max-w-3xl rounded-2xl bg-stone-50 p-8 shadow-lg shadow-stone-200/50 sm:p-12"
+              >
+                {/* Stars */}
+                <div className="flex gap-1">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <svg
+                      key={i}
+                      className="h-5 w-5 text-primary-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
 
-              <blockquote className="mt-6 font-serif text-xl leading-relaxed text-stone-700 sm:text-2xl">
-                &ldquo;{current.quote}&rdquo;
-              </blockquote>
+                <blockquote className="mt-6 font-serif text-xl leading-relaxed text-stone-700 sm:text-2xl">
+                  &ldquo;{testimonial.quote}&rdquo;
+                </blockquote>
 
-              <div className="mt-8 flex items-center gap-4">
-                <img
-                  src={current.image}
-                  alt={current.name}
-                  className="h-12 w-12 rounded-full object-cover"
-                />
-                <div>
-                  <p className="font-semibold text-stone-900">{current.name}</p>
-                  <p className="text-sm text-stone-500">{current.role}</p>
+                <div className="mt-8 flex items-center gap-4">
+                  <img
+                    src={testimonial.image}
+                    alt={testimonial.name}
+                    className="h-12 w-12 rounded-full object-cover"
+                  />
+                  <div>
+                    <p className="font-semibold text-stone-900">{testimonial.name}</p>
+                    <p className="text-sm text-stone-500">{testimonial.role}</p>
+                  </div>
                 </div>
               </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Navigation */}
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <button
-              onClick={() => {
-                prev();
-              }}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-stone-300 text-stone-400 transition-colors hover:border-primary-500 hover:text-primary-600"
-              aria-label="Previous testimonial"
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-              </svg>
-            </button>
-
-            <div className="flex gap-2">
-              {testimonials.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActive(i)}
-                  className={`h-2 rounded-full transition-all ${
-                    i === active
-                      ? 'w-8 bg-primary-500'
-                      : 'w-2 bg-stone-300 hover:bg-stone-400'
-                  }`}
-                  aria-label={`Go to testimonial ${i + 1}`}
-                />
-              ))}
-            </div>
-
-            <button
-              onClick={next}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-stone-300 text-stone-400 transition-colors hover:border-primary-500 hover:text-primary-600"
-              aria-label="Next testimonial"
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-              </svg>
-            </button>
-          </div>
+            ))}
+          </motion.div>
         </div>
       </div>
     </section>
