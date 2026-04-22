@@ -82,6 +82,8 @@ export default function Testimonials() {
               const index = (currentIndex + offset) % testimonials.length;
               const testimonial = testimonials[index];
               
+              if (!testimonial) return null;
+              
               return (
                 <motion.div
                   key={index}
