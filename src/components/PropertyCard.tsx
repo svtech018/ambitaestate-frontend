@@ -65,7 +65,7 @@ export default function PropertyCard({ property, index = 0 }: Props) {
 
         {/* Info */}
         <div className="p-5">
-          <h3 style={{ fontFamily: 'Gupter, serif' }} className="text-lg font-semibold text-stone-900 group-hover:text-primary-600 transition-colors">
+          <h3 style={{ fontFamily: 'Crimson Text, serif', fontWeight: 400 }} className="text-lg text-stone-900 group-hover:text-primary-600 transition-colors">
             {property.title}
           </h3>
           <p className="mt-1 text-sm text-stone-500">

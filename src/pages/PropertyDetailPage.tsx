@@ -185,7 +185,7 @@ export default function PropertyDetailPage() {
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-4">
               <div>
-                <h1 style={{ fontFamily: 'Gupter, serif' }} className="text-4xl sm:text-5xl lg:text-6xl font-bold text-stone-900 leading-tight tracking-tight">
+                <h1 style={{ fontFamily: 'Crimson Text, serif', fontWeight: 400 }} className="text-4xl sm:text-5xl lg:text-6xl text-stone-900 leading-tight tracking-tight">
                   {property.title}
                 </h1>
                 <p className="mt-3 text-base sm:text-lg text-stone-500">
