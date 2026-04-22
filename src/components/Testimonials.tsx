@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const testimonials = [
@@ -42,6 +42,14 @@ const testimonials = [
 
 export default function Testimonials() {
   const [active, setActive] = useState(0);
+
+  // Auto-rotate carousel every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActive((p) => (p + 1) % testimonials.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const next = () => setActive((p) => (p + 1) % testimonials.length);
   const prev = () =>
@@ -116,7 +124,9 @@ export default function Testimonials() {
           {/* Navigation */}
           <div className="mt-8 flex items-center justify-center gap-4">
             <button
-              onClick={prev}
+              onClick={() => {
+                prev();
+              }}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-stone-300 text-stone-400 transition-colors hover:border-primary-500 hover:text-primary-600"
               aria-label="Previous testimonial"
             >

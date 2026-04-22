@@ -131,7 +131,7 @@ export default function PropertyDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="relative aspect-video overflow-hidden rounded-2xl">
+          <div className="relative aspect-video overflow-hidden rounded-2xl bg-stone-100">
             <img
               src={images[activeImage] ?? placeholderImg}
               alt={property.title}
@@ -185,10 +185,10 @@ export default function PropertyDetailPage() {
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-4">
               <div>
-                <h1 className="font-serif text-3xl font-bold text-stone-900 sm:text-4xl">
+                <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-bold text-stone-900 leading-tight tracking-tight">
                   {property.title}
                 </h1>
-                <p className="mt-2 text-stone-500">
+                <p className="mt-3 text-base sm:text-lg text-stone-500">
                   {property.address}, {property.city}, {property.state}{' '}
                   {property.zipCode}
                 </p>
