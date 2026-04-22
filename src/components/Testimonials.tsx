@@ -65,15 +65,17 @@ export default function Testimonials() {
           </p>
         </motion.div>
 
-        <div className="relative mt-16 overflow-hidden">
+        <div className="relative mt-16 overflow-hidden bg-white">
           <motion.div
-            animate={{ x: [0, -3200] }}
+            initial={{ x: 0 }}
+            animate={{ x: -3200 }}
             transition={{
-              duration: 40,
+              duration: 50,
               repeat: Infinity,
               ease: 'linear',
+              repeatType: 'loop',
             }}
-            className="flex gap-8"
+            className="flex gap-8 w-max"
           >
             {duplicatedTestimonials.map((testimonial, idx) => (
               <div
