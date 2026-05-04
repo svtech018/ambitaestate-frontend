@@ -256,9 +256,13 @@ export default function PropertyDetailPage() {
               <h2 className="font-serif text-2xl font-bold text-stone-900">
                 About this property
               </h2>
-              <p className="mt-4 leading-relaxed text-stone-600">
-                {property.description}
-              </p>
+              <div className="mt-4 space-y-2">
+                {property.description.split('\n').map((line, index) => (
+                  <p key={index} className="leading-relaxed text-stone-600 whitespace-pre-wrap">
+                    {line.trim()}
+                  </p>
+                ))}
+              </div>
             </div>
 
             {/* Amenities */}
