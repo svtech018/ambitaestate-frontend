@@ -80,6 +80,33 @@ function bytesToDataUrl(bytes: number[], mimeType: string): string {
   return `data:${mimeType};base64,${btoa(binary)}`;
 }
 
+async function imageUrlToDataUrl(imageUrl: string): Promise<string> {
+  try {
+    // If it's already a data URL, return as-is
+    if (imageUrl.startsWith('data:')) {
+      return imageUrl;
+    }
+    
+    // Fetch the image from the API endpoint and convert to data URL
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.status}`);
+    }
+    
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.warn(`Failed to load image from ${imageUrl}:`, error);
+    // Return a placeholder or generic data URL on error
+    return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23ddd" width="100" height="100"/%3E%3Ctext fill="%23999" font-size="14" x="20" y="50"%3EImage unavailable%3C/text%3E%3C/svg%3E';
+  }
+}
+
 async function fileToUploadedImage(file: File): Promise<UploadedImageItem> {
   const buffer = await file.arrayBuffer();
   const bytes = Array.from(new Uint8Array(buffer));
@@ -251,17 +278,23 @@ export default function AdminPropertiesPage() {
       yearBuilt: property.yearBuilt ?? new Date().getFullYear(),
       description: property.description ?? '',
     });
-    setUploadedImages(
-      (property.imageUrls ?? []).map((imageUrl, index) => ({
-        name: `image-${index + 1}`,
-        size: 0,
-        mimeType: imageUrl.startsWith('data:')
-          ? imageUrl.slice(5, imageUrl.indexOf(';')) || 'image/*'
-          : 'image/*',
-        bytes: [],
-        previewUrl: imageUrl,
-      }))
-    );
+    
+    // Load existing images and convert to data URLs for preview
+    Promise.all(
+      (property.imageUrls ?? []).map(async (imageUrl, index) => {
+        const previewUrl = await imageUrlToDataUrl(imageUrl);
+        return {
+          name: `image-${index + 1}`,
+          size: 0,
+          mimeType: previewUrl.startsWith('data:')
+            ? previewUrl.slice(5, previewUrl.indexOf(';')) || 'image/*'
+            : 'image/*',
+          bytes: [],
+          previewUrl,
+        };
+      })
+    ).then(setUploadedImages);
+    
     setFieldErrors({});
     setIsFormOpen(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
