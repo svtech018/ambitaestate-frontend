@@ -21,7 +21,20 @@ export default function PropertyCard({ property, index = 0 }: Props) {
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   
-  const image = imageError || !property.imageUrls?.[0] ? placeholderImg : property.imageUrls[0];
+  // Get the first image URL from the property
+  const rawImageUrl = property.imageUrls?.[0];
+  
+  // Handle relative URLs - prepend API base URL if needed
+  const getImageUrl = (url?: string): string => {
+    if (!url) return placeholderImg;
+    // If it's already an absolute URL, return as-is
+    if (url.startsWith('http')) return url;
+    // If it's a relative path, prepend the API base
+    const apiBase = import.meta.env.VITE_API_BASE_URL || '/api';
+    return `${apiBase}${url}`;
+  };
+  
+  const image = imageError ? placeholderImg : (getImageUrl(rawImageUrl) || placeholderImg);
 
   return (
     <motion.div

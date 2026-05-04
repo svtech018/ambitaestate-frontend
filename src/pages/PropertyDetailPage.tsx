@@ -73,6 +73,15 @@ export default function PropertyDetailPage() {
     });
   };
 
+  const getImageUrl = (url?: string): string => {
+    if (!url) return placeholderImg;
+    // If it's already an absolute URL, return as-is
+    if (url.startsWith('http')) return url;
+    // If it's a relative path, prepend the API base
+    const apiBase = import.meta.env.VITE_API_BASE_URL || '/api';
+    return `${apiBase}${url}`;
+  };
+
   useEffect(() => {
     if (!id) return;
     propertyService
@@ -152,7 +161,7 @@ export default function PropertyDetailPage() {
               </div>
             )}
             <img
-              src={imageErrors.has(activeImage) || !images[activeImage] ? placeholderImg : (images[activeImage] ?? placeholderImg)}
+              src={imageErrors.has(activeImage) ? placeholderImg : getImageUrl(images[activeImage])}
               alt={property.title}
               className="h-full w-full object-cover"
               onLoad={() => handleImageLoad(activeImage)}
@@ -185,7 +194,7 @@ export default function PropertyDetailPage() {
                   }`}
                 >
                   <img
-                    src={imageErrors.has(i) ? placeholderImg : img}
+                    src={imageErrors.has(i) ? placeholderImg : getImageUrl(img)}
                     alt={`${property.title} ${i + 1}`}
                     className="h-full w-full object-cover"
                     onError={() => handleImageError(i)}
