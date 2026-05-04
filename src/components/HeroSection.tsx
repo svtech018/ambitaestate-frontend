@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import heroModernHome from '../assets/images/hero-modern-home.jpeg';
 
-const HERO_IMAGE =
-  'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=2400&q=90';
+const HERO_IMAGE = heroModernHome;
 
 export default function HeroSection() {
   return (
