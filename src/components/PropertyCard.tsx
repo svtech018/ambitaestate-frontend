@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 import type { Property } from '../types';
 
 const placeholderImg =
@@ -17,7 +18,10 @@ interface Props {
 }
 
 export default function PropertyCard({ property, index = 0 }: Props) {
-  const image = property.imageUrls?.[0] || placeholderImg;
+  const [imageError, setImageError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const image = imageError || !property.imageUrls?.[0] ? placeholderImg : property.imageUrls[0];
 
   return (
     <motion.div
@@ -31,12 +35,24 @@ export default function PropertyCard({ property, index = 0 }: Props) {
         className="group block overflow-hidden rounded-2xl bg-white shadow-md shadow-stone-200/50 transition-all hover:shadow-xl hover:shadow-stone-300/50"
       >
         {/* Image */}
-        <div className="relative aspect-[4/3] overflow-hidden">
+        <div className="relative aspect-[4/3] overflow-hidden bg-stone-200">
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-stone-100">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-stone-200 border-t-primary-500" />
+            </div>
+          )}
           <img
             src={image}
             alt={property.title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            className={`h-full w-full object-cover transition-all duration-500 group-hover:scale-110 ${
+              isLoading ? 'opacity-0' : 'opacity-100'
+            }`}
             loading="lazy"
+            onLoad={() => setIsLoading(false)}
+            onError={() => {
+              setImageError(true);
+              setIsLoading(false);
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
 

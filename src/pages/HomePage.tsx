@@ -2,6 +2,7 @@ import HeroSection from '../components/HeroSection';
 import AboutSection from '../components/AboutSection';
 import FeaturedProperties from '../components/FeaturedProperties';
 import ReviewsSection from '../components/ReviewsSection';
+import FAQSection from '../components/FAQSection';
 import ContactForm from '../components/ContactForm';
 
 export default function HomePage() {
@@ -11,6 +12,7 @@ export default function HomePage() {
       <AboutSection />
       <FeaturedProperties />
       <ReviewsSection />
+      <FAQSection />
       <ContactForm />
     </main>
   );

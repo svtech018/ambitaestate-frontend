@@ -13,7 +13,6 @@ function extractYouTubeId(url: string): string | null {
 export default function ReviewsSection() {
   const [textReviews, setTextReviews] = useState<Review[]>([]);
   const [videoReviews, setVideoReviews] = useState<Review[]>([]);
-  const [active, setActive] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -45,10 +44,6 @@ export default function ReviewsSection() {
 
   if (!hasText && !hasVideo) return null;
 
-  const current = hasText ? textReviews[active % textReviews.length] : null;
-  const next = () => setActive((p) => (p + 1) % textReviews.length);
-  const prev = () => setActive((p) => (p - 1 + textReviews.length) % textReviews.length);
-
   return (
     <section className="bg-white py-16 lg:py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -70,93 +65,55 @@ export default function ReviewsSection() {
           </p>
         </motion.div>
 
-        {/* Text Reviews Carousel */}
-        {hasText && current && (
-          <div className="relative mt-16">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={active}
-                initial={{ opacity: 0, x: 40 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -40 }}
-                transition={{ duration: 0.4 }}
-                className="mx-auto max-w-3xl rounded-2xl bg-stone-50 p-5 shadow-lg shadow-stone-200/50 sm:p-10"
-              >
-                {/* Stars */}
-                {current.rating && (
-                  <div className="flex gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <svg
-                        key={i}
-                        className={`h-5 w-5 ${
-                          i < current.rating! ? 'text-amber-400' : 'text-stone-200'
-                        }`}
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </div>
-                )}
-
-                <blockquote className="mt-6 font-serif text-lg leading-relaxed text-stone-700 sm:text-xl">
-                  &ldquo;{current.reviewText}&rdquo;
-                </blockquote>
-
-                <div className="mt-8 flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 text-lg font-bold text-primary-700">
-                    {current.reviewerName.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-stone-900">{current.reviewerName}</p>
-                    {current.reviewerRole && (
-                      <p className="text-sm text-stone-500">{current.reviewerRole}</p>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-
-            {/* Navigation */}
-            {textReviews.length > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-4">
-                <button
-                  onClick={prev}
-                  className="flex h-12 w-12 items-center justify-center rounded-full border border-stone-300 text-stone-400 transition-colors hover:border-primary-500 hover:text-primary-600"
-                  aria-label="Previous review"
+        {/* Text Reviews Grid */}
+        {hasText && (
+          <div className="mt-16">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {textReviews.slice(0, 4).map((review, idx) => (
+                <motion.div
+                  key={review.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: idx * 0.1 }}
+                  className="rounded-2xl bg-stone-50 p-6 shadow-md shadow-stone-200/50"
                 >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                  </svg>
-                </button>
+                  {/* Stars */}
+                  {review.rating && (
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <svg
+                          key={i}
+                          className={`h-4 w-4 ${
+                            i < review.rating! ? 'text-amber-400' : 'text-stone-200'
+                          }`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                  )}
 
-                <div className="flex gap-2">
-                  {textReviews.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setActive(i)}
-                      className={`h-2 rounded-full transition-all ${
-                        i === active % textReviews.length
-                          ? 'w-8 bg-primary-500'
-                          : 'w-2 bg-stone-300 hover:bg-stone-400'
-                      }`}
-                      aria-label={`Go to review ${i + 1}`}
-                    />
-                  ))}
-                </div>
+                  <blockquote className="mt-4 font-serif text-sm leading-relaxed text-stone-700 line-clamp-4">
+                    &ldquo;{review.reviewText}&rdquo;
+                  </blockquote>
 
-                <button
-                  onClick={next}
-                  className="flex h-12 w-12 items-center justify-center rounded-full border border-stone-300 text-stone-400 transition-colors hover:border-primary-500 hover:text-primary-600"
-                  aria-label="Next review"
-                >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                  </svg>
-                </button>
-              </div>
-            )}
+                  <div className="mt-4 flex items-center gap-3 border-t border-stone-200 pt-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-100 text-sm font-bold text-primary-700">
+                      {review.reviewerName.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate font-semibold text-stone-900 text-sm">{review.reviewerName}</p>
+                      {review.reviewerRole && (
+                        <p className="truncate text-xs text-stone-500">{review.reviewerRole}</p>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         )}
 
