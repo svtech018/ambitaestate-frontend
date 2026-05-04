@@ -77,7 +77,9 @@ export default function PropertyDetailPage() {
     if (!url) return placeholderImg;
     // If it's already an absolute URL, return as-is
     if (url.startsWith('http')) return url;
-    // If it's a relative path, prepend the API base
+    // If it's already a relative path starting with /, use as-is
+    if (url.startsWith('/')) return url;
+    // Otherwise prepend the API base for relative paths without leading /
     const apiBase = import.meta.env.VITE_API_BASE_URL || '/api';
     return `${apiBase}${url}`;
   };
