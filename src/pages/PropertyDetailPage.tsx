@@ -58,6 +58,20 @@ export default function PropertyDetailPage() {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
+  const [imageLoadingStates, setImageLoadingStates] = useState<Set<number>>(new Set());
+
+  const handleImageError = (index: number) => {
+    setImageErrors((prev) => new Set(prev).add(index));
+  };
+
+  const handleImageLoad = (index: number) => {
+    setImageLoadingStates((prev) => {
+      const next = new Set(prev);
+      next.delete(index);
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -131,11 +145,18 @@ export default function PropertyDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="relative w-full overflow-hidden rounded-2xl bg-stone-100" style={{ aspectRatio: '16/9', maxHeight: '600px' }}>
+          <div className="relative w-full overflow-hidden rounded-2xl bg-stone-200" style={{ aspectRatio: '16/9', maxHeight: '600px' }}>
+            {imageLoadingStates.has(activeImage) && (
+              <div className="absolute inset-0 flex items-center justify-center bg-stone-100 z-10">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-stone-200 border-t-primary-500" />
+              </div>
+            )}
             <img
-              src={images[activeImage] ?? placeholderImg}
+              src={imageErrors.has(activeImage) || !images[activeImage] ? placeholderImg : (images[activeImage] ?? placeholderImg)}
               alt={property.title}
-              className="h-full w-full object-contain"
+              className="h-full w-full object-cover"
+              onLoad={() => handleImageLoad(activeImage)}
+              onError={() => handleImageError(activeImage)}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
 
@@ -157,16 +178,17 @@ export default function PropertyDetailPage() {
                 <button
                   key={i}
                   onClick={() => setActiveImage(i)}
-                  className={`h-20 w-28 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
+                  className={`relative h-20 w-28 flex-shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
                     i === activeImage
                       ? 'border-primary-500'
                       : 'border-transparent opacity-60 hover:opacity-100'
                   }`}
                 >
                   <img
-                    src={img}
+                    src={imageErrors.has(i) ? placeholderImg : img}
                     alt={`${property.title} ${i + 1}`}
                     className="h-full w-full object-cover"
+                    onError={() => handleImageError(i)}
                   />
                 </button>
               ))}
